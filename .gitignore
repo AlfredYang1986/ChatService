@@ -3,6 +3,7 @@
 /target/streams
 /target/resolution-cache
 /project/project/target/config-classes
+/project/target/config-classes
 /project/target/resolution-cache
 /project/target/streams
 /.cache
