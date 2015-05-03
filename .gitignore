@@ -1,7 +1,7 @@
 /.target
 /bin
-/target
-/project
+/target/
+/project/
 /.cache
 /.classpath
 /*.swp
