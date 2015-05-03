@@ -2,6 +2,7 @@
 /bin
 /target/streams
 /target/resolution-cache
+/target/.history 
 /project/project/target/config-classes
 /project/target/config-classes
 /project/target/resolution-cache
