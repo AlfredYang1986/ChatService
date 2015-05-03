@@ -1,6 +1,6 @@
-// @SOURCE:/Users/yangyuan/Desktop/ChatService/conf/routes
+// @SOURCE:/Users/yangyuan/Desktop/ChatService2/conf/routes
 // @HASH:3f58788c03b1ff5bada86d7bbe33ccd17d838f16
-// @DATE:Sun May 03 20:17:41 HKT 2015
+// @DATE:Mon May 04 00:53:43 HKT 2015
 
 import Routes.{prefix => _prefix, defaultPrefix => _defaultPrefix}
 import play.core._
