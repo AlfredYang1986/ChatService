@@ -11,7 +11,15 @@ object messageController extends Controller {
 		Ok(views.html.index("Your new application is ready."))
 	}
 
+	// login
 	def loginWithName = Action (request => requestArgs(request)(messageModule.loginWithName))
+
+	// friends
+	def addOneFriend = Action (request => requestArgs(request)(messageModule.addOneFriend))
+	def deleteOneFriend = Action (request => requestArgs(request)(messageModule.deleteOneFriend)) 
+	def queryAllFriend = Action (request => requestArgs(request)(messageModule.queryFriends)) 
+	
+	// message
 	def regiterWithDevice = Action (request => requestArgs(request)(messageModule.regiterWithDevice))
 	def sendMessage = Action (request => requestArgs(request)(messageModule.sendMessage))
 	def queryMessages = Action (request => requestArgs(request)(messageModule.queryMessages)) 

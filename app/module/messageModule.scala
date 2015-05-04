@@ -12,7 +12,8 @@ import com.mongodb.casbah.Imports._
 import java.util.Date
 
 object messageModule {
-	
+
+	// Login
 	def loginWithName(data : JsValue) : JsValue = {
 		
 		val user_id= (data \ "user_id").asOpt[String].get
@@ -25,8 +26,8 @@ object messageModule {
 			val builder = MongoDBObject.newBuilder
 			builder += "user_id" -> user_id
 			val friend_list = MongoDBList.newBuilder
-			friend_list += "friends" -> friend_list.result
-			
+			builder += "friends" -> friend_list.result
+		
 			_data_connection.getCollection("users") += builder.result
 			/**
 			 * return 
@@ -36,9 +37,74 @@ object messageModule {
 		}
 	}
 
+	// Friends
+	def addOneFriend(data : JsValue) : JsValue = {
+
+		val user_id = (data \ "user_id").asOpt[String].get
+		val friend_id = (data \ "friend_id").asOpt[String].get
+	
+		val user_ref = (from db() in "users" where "user_id" -> user_id select (x => x)).head
+		val friend_ref = (from db() in "users" where "user_id" -> friend_id select (x => x)).head
+	
+		user_ref.getAs[MongoDBList]("friends").map { x => 
+		  	if (x.contains(friend_id)) //ErrorCode.errorToJson("already friends")
+		  		queryFriends(data)
+		  	else {
+		  		x += friend_id
+		  		_data_connection.getCollection("users").update(DBObject("user_id" -> user_id), user_ref)
+		  		
+		  		friend_ref.getAs[MongoDBList]("friends").map { y =>
+		  		  	y += user_id
+		  		  	_data_connection.getCollection("users").update(DBObject("user_id" -> friend_id), friend_ref)
+		  		}.getOrElse(throw new Exception)
+		  		queryFriends(data)
+		  	}
+		}.getOrElse(throw new Exception)
+	}
+	
+	def deleteOneFriend(data : JsValue) = {
+	
+		val user_id = (data \ "user_id").asOpt[String].get
+		val friend_id = (data \ "friend_id").asOpt[String].get
+	
+		val user_ref = (from db() in "users" where "user_id" -> user_id select (x => x)).head
+		val friend_ref = (from db() in "users" where "user_id" -> friend_id select (x => x)).head
+	
+		user_ref.getAs[MongoDBList]("friends").map { x => 
+		  	if (x.contains(friend_id)) {
+		  		user_ref.update("friends", x.filter(_ != friend_id))
+		  		_data_connection.getCollection("users").update(DBObject("user_id" -> user_id), user_ref)
+		  		
+		  		friend_ref.getAs[MongoDBList]("friends").map { y =>
+		  			friend_ref.update("friends", y.filter(_ != user_id))
+		  		  	_data_connection.getCollection("users").update(DBObject("user_id" -> friend_id), friend_ref)
+		  		}.getOrElse(throw new Exception)
+		  		queryFriends(data)
+		  	} else queryFriends(data)
+		  	
+		}.getOrElse(throw new Exception)  
+	}
+	
+	def queryFriends(data : JsValue) : JsValue = {
+
+		val user_id = (data \ "user_id").asOpt[String].get
+		val user_ref = (from db() in "users" where "user_id" -> user_id select (x => x)).head
+	
+		var re : List[JsValue] = Nil
+		user_ref.getAs[MongoDBList]("friends").map { x => 
+		 	x.toSeq.map { it => 
+		 		re = toJson(it.asInstanceOf[String]) :: re
+		 	}
+		  
+		}.getOrElse(throw new Exception)
+
+		Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(Map("friends" -> toJson(re)))))
+	}
+
+	// Messages
 	def regiterWithDevice(data : JsValue) : JsValue = null
 	
-	def sendMessage(data : JsValue) = {
+	def sendMessage(data : JsValue) : JsValue = {
 		
 		val user_id = (data \ "user_id").asOpt[String].get
 		val date = new Date().getTime
@@ -62,9 +128,7 @@ object messageModule {
 				toJson(Map("status" -> toJson("success")))))	
 	}
 	
-	def queryFriends(data : JsValue) = null
-	
-	def queryMessages(data : JsValue) = {
+	def queryMessages(data : JsValue) : JsValue = {
 
 		val user_id = (data \ "user_id").asOpt[String].get
 
