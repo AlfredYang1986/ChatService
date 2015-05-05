@@ -1,6 +1,6 @@
 // @SOURCE:/Users/yangyuan/Desktop/ChatService2/conf/routes
-// @HASH:be40b73cd91861aeb43fa4601787831ee52bd81d
-// @DATE:Mon May 04 21:50:59 HKT 2015
+// @HASH:a1bea8efbae56e0eb56b3571b90e3fb53cd341c7
+// @DATE:Tue May 05 14:19:34 HKT 2015
 
 import Routes.{prefix => _prefix, defaultPrefix => _defaultPrefix}
 import play.core._
@@ -13,8 +13,11 @@ import play.api.mvc._
 import Router.queryString
 
 
+// @LINE:23
 // @LINE:20
-// @LINE:17
+// @LINE:19
+// @LINE:18
+// @LINE:15
 // @LINE:14
 // @LINE:13
 // @LINE:12
@@ -22,7 +25,10 @@ import Router.queryString
 // @LINE:6
 package controllers {
 
-// @LINE:17
+// @LINE:20
+// @LINE:19
+// @LINE:18
+// @LINE:15
 // @LINE:14
 // @LINE:13
 // @LINE:12
@@ -37,13 +43,13 @@ def sendMessage(): Call = {
 }
                                                 
 
-// @LINE:17
+// @LINE:18
 def addOneFriend(): Call = {
    Call("POST", _prefix + { _defaultPrefix } + "addOneFriend")
 }
                                                 
 
-// @LINE:14
+// @LINE:15
 def regiterWithDevice(): Call = {
    Call("POST", _prefix + { _defaultPrefix } + "registerDevice")
 }
@@ -55,9 +61,27 @@ def queryMessages(): Call = {
 }
                                                 
 
+// @LINE:19
+def deleteOneFriend(): Call = {
+   Call("POST", _prefix + { _defaultPrefix } + "deleteOneFriend")
+}
+                                                
+
+// @LINE:20
+def queryAllFriend(): Call = {
+   Call("POST", _prefix + { _defaultPrefix } + "queryAllFriend")
+}
+                                                
+
 // @LINE:9
 def loginWithName(): Call = {
    Call("POST", _prefix + { _defaultPrefix } + "loginWithName")
+}
+                                                
+
+// @LINE:14
+def queryMessagesWithFriend(): Call = {
+   Call("POST", _prefix + { _defaultPrefix } + "queryMessagesWithFriend")
 }
                                                 
 
@@ -70,11 +94,11 @@ def index(): Call = {
 }
                           
 
-// @LINE:20
+// @LINE:23
 class ReverseAssets {
     
 
-// @LINE:20
+// @LINE:23
 def at(file:String): Call = {
    Call("GET", _prefix + { _defaultPrefix } + "assets/" + implicitly[PathBindable[String]].unbind("file", file))
 }
@@ -86,8 +110,11 @@ def at(file:String): Call = {
                   
 
 
+// @LINE:23
 // @LINE:20
-// @LINE:17
+// @LINE:19
+// @LINE:18
+// @LINE:15
 // @LINE:14
 // @LINE:13
 // @LINE:12
@@ -95,7 +122,10 @@ def at(file:String): Call = {
 // @LINE:6
 package controllers.javascript {
 
-// @LINE:17
+// @LINE:20
+// @LINE:19
+// @LINE:18
+// @LINE:15
 // @LINE:14
 // @LINE:13
 // @LINE:12
@@ -115,7 +145,7 @@ def sendMessage : JavascriptReverseRoute = JavascriptReverseRoute(
 )
                         
 
-// @LINE:17
+// @LINE:18
 def addOneFriend : JavascriptReverseRoute = JavascriptReverseRoute(
    "controllers.messageController.addOneFriend",
    """
@@ -126,7 +156,7 @@ def addOneFriend : JavascriptReverseRoute = JavascriptReverseRoute(
 )
                         
 
-// @LINE:14
+// @LINE:15
 def regiterWithDevice : JavascriptReverseRoute = JavascriptReverseRoute(
    "controllers.messageController.regiterWithDevice",
    """
@@ -148,12 +178,45 @@ def queryMessages : JavascriptReverseRoute = JavascriptReverseRoute(
 )
                         
 
+// @LINE:19
+def deleteOneFriend : JavascriptReverseRoute = JavascriptReverseRoute(
+   "controllers.messageController.deleteOneFriend",
+   """
+      function() {
+      return _wA({method:"POST", url:"""" + _prefix + { _defaultPrefix } + """" + "deleteOneFriend"})
+      }
+   """
+)
+                        
+
+// @LINE:20
+def queryAllFriend : JavascriptReverseRoute = JavascriptReverseRoute(
+   "controllers.messageController.queryAllFriend",
+   """
+      function() {
+      return _wA({method:"POST", url:"""" + _prefix + { _defaultPrefix } + """" + "queryAllFriend"})
+      }
+   """
+)
+                        
+
 // @LINE:9
 def loginWithName : JavascriptReverseRoute = JavascriptReverseRoute(
    "controllers.messageController.loginWithName",
    """
       function() {
       return _wA({method:"POST", url:"""" + _prefix + { _defaultPrefix } + """" + "loginWithName"})
+      }
+   """
+)
+                        
+
+// @LINE:14
+def queryMessagesWithFriend : JavascriptReverseRoute = JavascriptReverseRoute(
+   "controllers.messageController.queryMessagesWithFriend",
+   """
+      function() {
+      return _wA({method:"POST", url:"""" + _prefix + { _defaultPrefix } + """" + "queryMessagesWithFriend"})
       }
    """
 )
@@ -173,11 +236,11 @@ def index : JavascriptReverseRoute = JavascriptReverseRoute(
 }
               
 
-// @LINE:20
+// @LINE:23
 class ReverseAssets {
     
 
-// @LINE:20
+// @LINE:23
 def at : JavascriptReverseRoute = JavascriptReverseRoute(
    "controllers.Assets.at",
    """
@@ -194,8 +257,11 @@ def at : JavascriptReverseRoute = JavascriptReverseRoute(
         
 
 
+// @LINE:23
 // @LINE:20
-// @LINE:17
+// @LINE:19
+// @LINE:18
+// @LINE:15
 // @LINE:14
 // @LINE:13
 // @LINE:12
@@ -204,7 +270,10 @@ def at : JavascriptReverseRoute = JavascriptReverseRoute(
 package controllers.ref {
 
 
-// @LINE:17
+// @LINE:20
+// @LINE:19
+// @LINE:18
+// @LINE:15
 // @LINE:14
 // @LINE:13
 // @LINE:12
@@ -219,13 +288,13 @@ def sendMessage(): play.api.mvc.HandlerRef[_] = new play.api.mvc.HandlerRef(
 )
                       
 
-// @LINE:17
+// @LINE:18
 def addOneFriend(): play.api.mvc.HandlerRef[_] = new play.api.mvc.HandlerRef(
    controllers.messageController.addOneFriend(), HandlerDef(this, "controllers.messageController", "addOneFriend", Seq(), "POST", """ friends""", _prefix + """addOneFriend""")
 )
                       
 
-// @LINE:14
+// @LINE:15
 def regiterWithDevice(): play.api.mvc.HandlerRef[_] = new play.api.mvc.HandlerRef(
    controllers.messageController.regiterWithDevice(), HandlerDef(this, "controllers.messageController", "regiterWithDevice", Seq(), "POST", """""", _prefix + """registerDevice""")
 )
@@ -237,9 +306,27 @@ def queryMessages(): play.api.mvc.HandlerRef[_] = new play.api.mvc.HandlerRef(
 )
                       
 
+// @LINE:19
+def deleteOneFriend(): play.api.mvc.HandlerRef[_] = new play.api.mvc.HandlerRef(
+   controllers.messageController.deleteOneFriend(), HandlerDef(this, "controllers.messageController", "deleteOneFriend", Seq(), "POST", """""", _prefix + """deleteOneFriend""")
+)
+                      
+
+// @LINE:20
+def queryAllFriend(): play.api.mvc.HandlerRef[_] = new play.api.mvc.HandlerRef(
+   controllers.messageController.queryAllFriend(), HandlerDef(this, "controllers.messageController", "queryAllFriend", Seq(), "POST", """""", _prefix + """queryAllFriend""")
+)
+                      
+
 // @LINE:9
 def loginWithName(): play.api.mvc.HandlerRef[_] = new play.api.mvc.HandlerRef(
    controllers.messageController.loginWithName(), HandlerDef(this, "controllers.messageController", "loginWithName", Seq(), "POST", """ login""", _prefix + """loginWithName""")
+)
+                      
+
+// @LINE:14
+def queryMessagesWithFriend(): play.api.mvc.HandlerRef[_] = new play.api.mvc.HandlerRef(
+   controllers.messageController.queryMessagesWithFriend(), HandlerDef(this, "controllers.messageController", "queryMessagesWithFriend", Seq(), "POST", """""", _prefix + """queryMessagesWithFriend""")
 )
                       
 
@@ -252,11 +339,11 @@ def index(): play.api.mvc.HandlerRef[_] = new play.api.mvc.HandlerRef(
 }
                           
 
-// @LINE:20
+// @LINE:23
 class ReverseAssets {
     
 
-// @LINE:20
+// @LINE:23
 def at(path:String, file:String): play.api.mvc.HandlerRef[_] = new play.api.mvc.HandlerRef(
    controllers.Assets.at(path, file), HandlerDef(this, "controllers.Assets", "at", Seq(classOf[String], classOf[String]), "GET", """ Map static resources from the /public folder to the /assets URL path""", _prefix + """assets/$file<.+>""")
 )

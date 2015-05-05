@@ -105,11 +105,11 @@ object messageModule {
 	def regiterWithDevice(data : JsValue) : JsValue = null
 	
 	def sendMessage(data : JsValue) : JsValue = {
-		
+	
 		val user_id = (data \ "user_id").asOpt[String].get
 		val date = new Date().getTime
 		val receiver = (data \ "receiver").asOpt[String].get
-		val message_type = (data \ "message_type").asOpt[String].get
+		val message_type = (data \ "message_type").asOpt[Int].get
 		val message_content = (data \ "message_content").asOpt[String].get
 	
 		val collection_name = "chat_history"
@@ -119,7 +119,7 @@ object messageModule {
 		builder += "receiver" -> receiver
 		builder += "message_type" -> message_type
 		builder += "message_content" -> message_content
-	 
+	
 		_data_connection.getCollection(collection_name) += builder.result
 		/**
 		 * return 
@@ -127,38 +127,49 @@ object messageModule {
 		Json.toJson(Map("status" -> toJson("ok"), "result" -> 
 				toJson(Map("status" -> toJson("success")))))	
 	}
-	
-	def queryMessages(data : JsValue) : JsValue = {
+
+	def queryMessageBase(data : JsValue, queryCondition : DBObject) : JsValue = {
 
 		val user_id = (data \ "user_id").asOpt[String].get
+//		val date = (data \ "date").asOpt[String].get
 
-		def getField(obj : MongoDBObject, name : String) = obj.get(name).map(_.asInstanceOf[String]).getOrElse(throw new Exception)
-		def getSender(x : MongoDBObject) : String = getField(x, "sender")
-		def getReceiver(x : MongoDBObject) : String =getField(x, "receiver") 
-		def getMessageType(x : MongoDBObject) : String = getField(x, "message_type")
-		def getMessageContent(x : MongoDBObject) : String = getField(x, "message_content")
+		def getField[T](obj : MongoDBObject, name : String) : T = obj.get(name).map(_.asInstanceOf[T]).getOrElse(throw new Exception)
+		def getSender(x : MongoDBObject) : String = getField[String](x, "sender")
+		def getReceiver(x : MongoDBObject) : String =getField[String](x, "receiver") 
+		def getMessageType(x : MongoDBObject) : Int = getField[Int](x, "message_type")
+		def getMessageContent(x : MongoDBObject) : String = getField[String](x, "message_content")
 		def target(x : MongoDBObject) : String = {
 		  	if (getSender(x) == user_id) getReceiver(x) else getSender(x)
 		}
 		
-		val date = (data \ "date").asOpt[String].get
 		val collection_name = "chat_history"
 
-		val result = from db() in collection_name where ($or("sender" -> user_id, "receiver" -> user_id)) select (x => x)
+		val result = from db() in collection_name where queryCondition select (x => x)
 
 		var resultMap : Map[String, List[JsValue]] = Map.empty
 		result.toList.distinct map { x =>
 			resultMap.get(target(x)).map {
 				lt => 
-					resultMap += (target(x) -> lt )
-						lt :+ toJson(Map("sender" -> toJson(getSender(x)), "receiver" -> toJson(getReceiver(x)), 
-								"message_type" -> toJson(getMessageType(x)), "message_content" -> toJson(getMessageContent(x))))
+					resultMap += target(x) -> 
+						(lt :+ (toJson(Map("sender" -> toJson(getSender(x)), "receiver" -> toJson(getReceiver(x)), 
+								"message_type" -> toJson(getMessageType(x)), "message_content" -> toJson(getMessageContent(x))))))
 			}.getOrElse{
 					resultMap += target(x) -> (toJson(Map("sender" -> toJson(getSender(x)), "receiver" -> toJson(getReceiver(x)), 
 								"message_type" -> toJson(getMessageType(x)), "message_content" -> toJson(getMessageContent(x)))) :: Nil)
 			}
 		}
-		
+	
 		Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(resultMap)))
+	}
+	
+	def queryMessageWithFriend(data : JsValue) : JsValue = {
+		val user_id = (data \ "user_id").asOpt[String].get
+		val target_id = (data \ "target_id").asOpt[String].get
+		queryMessageBase(data, $or($and("sender" -> user_id, "receiver" -> target_id), $and("sender" -> target_id, "receiver" -> user_id)))
+	}
+	
+	def queryMessages(data : JsValue) : JsValue = {
+		val user_id = (data \ "user_id").asOpt[String].get
+		queryMessageBase(data, $or("sender" -> user_id, "receiver" -> user_id))
 	}
 }

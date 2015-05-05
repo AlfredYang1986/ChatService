@@ -11,10 +11,13 @@ POST	/loginWithName				controllers.messageController.loginWithName
 # message
 POST 	/sendMessage				controllers.messageController.sendMessage
 POST 	/queryMessages				controllers.messageController.queryMessages
+POST 	/queryMessagesWithFriend	controllers.messageController.queryMessagesWithFriend
 POST	/registerDevice				controllers.messageController.regiterWithDevice
 
 # friends
 POST 	/addOneFriend				controllers.messageController.addOneFriend
+POST 	/deleteOneFriend			controllers.messageController.deleteOneFriend
+POST 	/queryAllFriend				controllers.messageController.queryAllFriend
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

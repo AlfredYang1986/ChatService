@@ -23,4 +23,5 @@ object messageController extends Controller {
 	def regiterWithDevice = Action (request => requestArgs(request)(messageModule.regiterWithDevice))
 	def sendMessage = Action (request => requestArgs(request)(messageModule.sendMessage))
 	def queryMessages = Action (request => requestArgs(request)(messageModule.queryMessages)) 
+	def queryMessagesWithFriend = Action (request => requestArgs(request)(messageModule.queryMessageWithFriend)) 
 }

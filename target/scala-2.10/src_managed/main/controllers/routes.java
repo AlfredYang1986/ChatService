@@ -1,6 +1,6 @@
 // @SOURCE:/Users/yangyuan/Desktop/ChatService2/conf/routes
-// @HASH:be40b73cd91861aeb43fa4601787831ee52bd81d
-// @DATE:Mon May 04 21:50:59 HKT 2015
+// @HASH:a1bea8efbae56e0eb56b3571b90e3fb53cd341c7
+// @DATE:Tue May 05 14:19:34 HKT 2015
 
 package controllers;
 
