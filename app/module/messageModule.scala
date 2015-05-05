@@ -107,7 +107,7 @@ object messageModule {
 	def sendMessage(data : JsValue) : JsValue = {
 	
 		val user_id = (data \ "user_id").asOpt[String].get
-		val date = new Date().getTime
+		val date = new Date().getTime.longValue
 		val receiver = (data \ "receiver").asOpt[String].get
 		val message_type = (data \ "message_type").asOpt[Int].get
 		val message_content = (data \ "message_content").asOpt[String].get
@@ -117,6 +117,7 @@ object messageModule {
 		val builder = MongoDBObject.newBuilder
 		builder += "sender" -> user_id
 		builder += "receiver" -> receiver
+		builder += "date" -> date 
 		builder += "message_type" -> message_type
 		builder += "message_content" -> message_content
 	
@@ -138,6 +139,7 @@ object messageModule {
 		def getReceiver(x : MongoDBObject) : String =getField[String](x, "receiver") 
 		def getMessageType(x : MongoDBObject) : Int = getField[Int](x, "message_type")
 		def getMessageContent(x : MongoDBObject) : String = getField[String](x, "message_content")
+		def getMessageDate(x : MongoDBObject) : Long = getField[Long](x, "date")
 		def target(x : MongoDBObject) : String = {
 		  	if (getSender(x) == user_id) getReceiver(x) else getSender(x)
 		}
@@ -152,10 +154,10 @@ object messageModule {
 				lt => 
 					resultMap += target(x) -> 
 						(lt :+ (toJson(Map("sender" -> toJson(getSender(x)), "receiver" -> toJson(getReceiver(x)), 
-								"message_type" -> toJson(getMessageType(x)), "message_content" -> toJson(getMessageContent(x))))))
+								"message_type" -> toJson(getMessageType(x)), "message_content" -> toJson(getMessageContent(x)), "date" -> toJson(getMessageDate(x))))))
 			}.getOrElse{
 					resultMap += target(x) -> (toJson(Map("sender" -> toJson(getSender(x)), "receiver" -> toJson(getReceiver(x)), 
-								"message_type" -> toJson(getMessageType(x)), "message_content" -> toJson(getMessageContent(x)))) :: Nil)
+								"message_type" -> toJson(getMessageType(x)), "message_content" -> toJson(getMessageContent(x)), "date" -> toJson(getMessageDate(x)))) :: Nil)
 			}
 		}
 	
