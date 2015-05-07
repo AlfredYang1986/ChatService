@@ -11,6 +11,8 @@ import com.mongodb.casbah.Imports._
 
 import java.util.Date
 
+import module._
+
 object messageModule {
 
 	// Login
@@ -102,8 +104,7 @@ object messageModule {
 	}
 
 	// Messages
-	def regiterWithDevice(data : JsValue) : JsValue = null
-	
+	// both restful and web socket go through this function
 	def sendMessage(data : JsValue) : JsValue = {
 	
 		val user_id = (data \ "user_id").asOpt[String].get
@@ -121,25 +122,35 @@ object messageModule {
 		builder += "message_type" -> message_type
 		builder += "message_content" -> message_content
 	
-		_data_connection.getCollection(collection_name) += builder.result
+		val message = builder.result
+		_data_connection.getCollection(collection_name) += message
 		/**
 		 * return 
 		 */
+		MessageNotificationModule.defaultNotificationCenter.map ( nc =>
+			nc ! pushNotification2(message2Json(message))).getOrElse(
+			    // TODO: not connect with websocket, so need to use apple notification api
+			)
 		Json.toJson(Map("status" -> toJson("ok"), "result" -> 
 				toJson(Map("status" -> toJson("success")))))	
 	}
+	
+	def getField[T](obj : MongoDBObject, name : String) : T = obj.get(name).map(_.asInstanceOf[T]).getOrElse(throw new Exception)
+	def getSender(x : MongoDBObject) : String = getField[String](x, "sender")
+	def getReceiver(x : MongoDBObject) : String =getField[String](x, "receiver") 
+	def getMessageType(x : MongoDBObject) : Int = getField[Int](x, "message_type")
+	def getMessageContent(x : MongoDBObject) : String = getField[String](x, "message_content")
+	def getMessageDate(x : MongoDBObject) : Long = getField[Long](x, "date")
 
+	def message2Json(x : MongoDBObject) : JsValue = toJson(Map("sender" -> toJson(getSender(x)), "receiver" -> toJson(getReceiver(x)), 
+								"message_type" -> toJson(getMessageType(x)), "message_content" -> toJson(getMessageContent(x)), 
+								"date" -> toJson(getMessageDate(x))))
+	
 	def queryMessageBase(data : JsValue, queryCondition : DBObject) : JsValue = {
 
 		val user_id = (data \ "user_id").asOpt[String].get
 //		val date = (data \ "date").asOpt[String].get
 
-		def getField[T](obj : MongoDBObject, name : String) : T = obj.get(name).map(_.asInstanceOf[T]).getOrElse(throw new Exception)
-		def getSender(x : MongoDBObject) : String = getField[String](x, "sender")
-		def getReceiver(x : MongoDBObject) : String =getField[String](x, "receiver") 
-		def getMessageType(x : MongoDBObject) : Int = getField[Int](x, "message_type")
-		def getMessageContent(x : MongoDBObject) : String = getField[String](x, "message_content")
-		def getMessageDate(x : MongoDBObject) : Long = getField[Long](x, "date")
 		def target(x : MongoDBObject) : String = {
 		  	if (getSender(x) == user_id) getReceiver(x) else getSender(x)
 		}
@@ -153,11 +164,9 @@ object messageModule {
 			resultMap.get(target(x)).map {
 				lt => 
 					resultMap += target(x) -> 
-						(lt :+ (toJson(Map("sender" -> toJson(getSender(x)), "receiver" -> toJson(getReceiver(x)), 
-								"message_type" -> toJson(getMessageType(x)), "message_content" -> toJson(getMessageContent(x)), "date" -> toJson(getMessageDate(x))))))
+						(lt :+ message2Json(x))
 			}.getOrElse{
-					resultMap += target(x) -> (toJson(Map("sender" -> toJson(getSender(x)), "receiver" -> toJson(getReceiver(x)), 
-								"message_type" -> toJson(getMessageType(x)), "message_content" -> toJson(getMessageContent(x)), "date" -> toJson(getMessageDate(x)))) :: Nil)
+					resultMap += target(x) -> (message2Json(x) :: Nil)
 			}
 		}
 	

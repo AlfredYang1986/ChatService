@@ -1,6 +1,5 @@
 package module
 
-import akka.actor.Actor
 import play.api._
 import play.api.mvc._
 import play.api.libs.json.Json
@@ -10,15 +9,19 @@ import play.api.libs.iteratee._
 import play.api.libs.concurrent._
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits._
+import akka.actor.Actor
 import akka.actor.Props
 import akka.pattern.ask
 import akka.util.Timeout
+import akka.actor.ActorRef
 
 // messages
 case class register(user_id: String) 												// message for register a user
 case class unRegister(user_id: String)												// message for quit the chat service
 case class channelCreated(user_id: String, channel: Concurrent.Channel[JsValue])	// message for channel created
-case class pushNotification(user_id: String, text: String)							// message for push messages
+case class pushNotification(user_id: String, text: String)							// message for push messages (only for test)
+case class receiveNotification2(data: JsValue)										// receive message for chat
+case class pushNotification2(data: JsValue)											// push message notification for chat
 case class registerCallback(user_id: String)										// message for register callback
 
 case class Connected(enumerator:Enumerator[JsValue])								// connect success
@@ -50,6 +53,23 @@ class ChatNotifycationCenter extends Actor {
 	  
 	  case pushNotification(user_id, text) =>
 		  notifyImpl(user_id, text)
+
+	  case receiveNotification2(data) =>
+		  println("receive message")
+		  println(data)
+		  messageModule.sendMessage(data)
+		  
+	  case pushNotification2(data) =>
+		  println("push notification")
+		  println(data)
+		  notify2PeersImpl(data)
+	}
+
+	def notify2PeersImpl(data : JsValue) = {
+		val to = (data \ "receiver").asOpt[String].get
+		registration_list.find(x => x._1 == to).foreach {
+		  case (_, channel) => { channel.foreach(_.push(data))}
+		}
 	}
 	
 	def notifyImpl(user_id : String, text : String) = {
@@ -69,9 +89,9 @@ class ChatNotifycationCenter extends Actor {
 	}
 }
 
-class MessageNotificationModule (implicit app: Application) {
+class MessageNotificationModule(defaultNotificationCenter : ActorRef) { //(implicit app: Application) {
 	
-	lazy val defaultNotificationCenter = Akka.system.actorOf(Props[ChatNotifycationCenter])
+//	lazy val defaultNotificationCenter = Akka.system.actorOf(Props[ChatNotifycationCenter])
 	
 	implicit val timeout = Timeout(1 second)
 	
@@ -80,7 +100,7 @@ class MessageNotificationModule (implicit app: Application) {
 
         case Connected(enumerator:Enumerator[JsValue]) =>
         	val iteratee = Iteratee.foreach[JsValue] { event =>
-        	defaultNotificationCenter ! pushNotification(user_id, (event \ "text").as[String]) 
+        	defaultNotificationCenter ! receiveNotification2(event)
           }.map { _ =>
             defaultNotificationCenter ! unRegister(user_id)
           }
@@ -101,5 +121,11 @@ class MessageNotificationModule (implicit app: Application) {
 }
 
 object MessageNotificationModule {
-	def apply()(implicit app: Application) : MessageNotificationModule = new MessageNotificationModule()(app)
+  
+	var defaultNotificationCenter : Option[ActorRef] = None //Akka.system.actorOf(Props[ChatNotifycationCenter])
+	def apply()(implicit app: Application) : MessageNotificationModule = defaultNotificationCenter.map(nc =>
+		new MessageNotificationModule(nc)).getOrElse {
+	  		defaultNotificationCenter = Some(Akka.system(app).actorOf(Props[ChatNotifycationCenter]))
+	  		new MessageNotificationModule(defaultNotificationCenter.get)
+	  	}
 }
