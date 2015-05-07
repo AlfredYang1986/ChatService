@@ -12,7 +12,9 @@ POST	/loginWithName				controllers.messageController.loginWithName
 POST 	/sendMessage				controllers.messageController.sendMessage
 POST 	/queryMessages				controllers.messageController.queryMessages
 POST 	/queryMessagesWithFriend	controllers.messageController.queryMessagesWithFriend
-POST	/registerDevice				controllers.messageController.regiterWithDevice
+
+# message websocket
+GET		/registerDevice/:user_id	controllers.MessageNotificationController.registerDevice(user_id)
 
 # friends
 POST 	/addOneFriend				controllers.messageController.addOneFriend
