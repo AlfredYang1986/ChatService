@@ -127,10 +127,11 @@ object messageModule {
 		/**
 		 * return 
 		 */
-		MessageNotificationModule.defaultNotificationCenter.map ( nc =>
-			nc ! pushNotification2(message2Json(message))).getOrElse(
-			    // TODO: not connect with websocket, so need to use apple notification api
-			)
+		MessageNotificationModule.defaultNotificationCenter.map { nc =>
+			println("start notification"); nc ! pushNotification2(message2Json(message)) }
+		.getOrElse(
+			// TODO: not connect with websocket, so need to use apple notification api
+		)
 		Json.toJson(Map("status" -> toJson("ok"), "result" -> 
 				toJson(Map("status" -> toJson("success")))))	
 	}

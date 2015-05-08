@@ -55,20 +55,17 @@ class ChatNotifycationCenter extends Actor {
 		  notifyImpl(user_id, text)
 
 	  case receiveNotification2(data) =>
-		  println("receive message")
-		  println(data)
 		  messageModule.sendMessage(data)
 		  
 	  case pushNotification2(data) =>
-		  println("push notification")
-		  println(data)
 		  notify2PeersImpl(data)
 	}
 
 	def notify2PeersImpl(data : JsValue) = {
 		val to = (data \ "receiver").asOpt[String].get
+		println(registration_list)
 		registration_list.find(x => x._1 == to).foreach {
-		  case (_, channel) => { channel.foreach(_.push(data))}
+		  case (_, channel) => { println(to); channel.foreach(_.push(data))}
 		}
 	}
 	
